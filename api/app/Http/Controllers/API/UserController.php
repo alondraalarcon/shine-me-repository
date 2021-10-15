@@ -11,7 +11,7 @@ class UserController extends Controller
     public function index()
     {
         return response()->json([
-            'user'  => User::all()->where('id','1'),
+            User::all()->where('id','1')->first(),
         ], 200);
     }
 }

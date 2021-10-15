@@ -19,5 +19,6 @@ use App\Http\Controllers\API\UserController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::resource('getUser',UserController::class);  
-Route::get('getCarwashProvider',[CarwashProviderController::class,'getcarwasher']);
+Route::resource('/getUser',UserController::class);  
+Route::get('/getCarwashProvider',[CarwashProviderController::class,'getCarwasher']);
+Route::post('/onchangeStatRider', [CarwashProviderController::class, 'onchangeStatRider'])->name('onchangeStatRider');
