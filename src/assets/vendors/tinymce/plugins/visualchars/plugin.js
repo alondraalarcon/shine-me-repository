@@ -1,5 +1,12 @@
+/**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ *
+ * Version: 5.7.0 (2021-02-10)
+ */
 (function () {
-var visualchars = (function () {
     'use strict';
 
     var Cell = function (initial) {
@@ -10,13 +17,9 @@ var visualchars = (function () {
       var set = function (v) {
         value = v;
       };
-      var clone = function () {
-        return Cell(get());
-      };
       return {
         get: get,
-        set: set,
-        clone: clone
+        set: set
       };
     };
 
@@ -28,43 +31,13 @@ var visualchars = (function () {
       };
       return { isEnabled: isEnabled };
     };
-    var Api = { get: get };
 
     var fireVisualChars = function (editor, state) {
       return editor.fire('VisualChars', { state: state });
     };
-    var Events = { fireVisualChars: fireVisualChars };
 
-    var charMap = {
-      '\xA0': 'nbsp',
-      '\xAD': 'shy'
+    var noop = function () {
     };
-    var charMapToRegExp = function (charMap, global) {
-      var key, regExp = '';
-      for (key in charMap) {
-        regExp += key;
-      }
-      return new RegExp('[' + regExp + ']', global ? 'g' : '');
-    };
-    var charMapToSelector = function (charMap) {
-      var key, selector = '';
-      for (key in charMap) {
-        if (selector) {
-          selector += ',';
-        }
-        selector += 'span.mce-' + charMap[key];
-      }
-      return selector;
-    };
-    var Data = {
-      charMap: charMap,
-      regExp: charMapToRegExp(charMap),
-      regExpGlobal: charMapToRegExp(charMap, true),
-      selector: charMapToSelector(charMap),
-      charMapToRegExp: charMapToRegExp,
-      charMapToSelector: charMapToSelector
-    };
-
     var constant = function (value) {
       return function () {
         return value;
@@ -73,8 +46,6 @@ var visualchars = (function () {
     var never = constant(false);
     var always = constant(true);
 
-    var never$1 = never;
-    var always$1 = always;
     var none = function () {
       return NONE;
     };
@@ -82,43 +53,33 @@ var visualchars = (function () {
       var eq = function (o) {
         return o.isNone();
       };
-      var call$$1 = function (thunk) {
+      var call = function (thunk) {
         return thunk();
       };
       var id = function (n) {
         return n;
       };
-      var noop$$1 = function () {
-      };
-      var nul = function () {
-        return null;
-      };
-      var undef = function () {
-        return undefined;
-      };
       var me = {
-        fold: function (n, s) {
+        fold: function (n, _s) {
           return n();
         },
-        is: never$1,
-        isSome: never$1,
-        isNone: always$1,
+        is: never,
+        isSome: never,
+        isNone: always,
         getOr: id,
-        getOrThunk: call$$1,
+        getOrThunk: call,
         getOrDie: function (msg) {
           throw new Error(msg || 'error: getOrDie called on none.');
         },
-        getOrNull: nul,
-        getOrUndefined: undef,
+        getOrNull: constant(null),
+        getOrUndefined: constant(undefined),
         or: id,
-        orThunk: call$$1,
+        orThunk: call,
         map: none,
-        ap: none,
-        each: noop$$1,
+        each: noop,
         bind: none,
-        flatten: none,
-        exists: never$1,
-        forall: always$1,
+        exists: never,
+        forall: always,
         filter: none,
         equals: eq,
         equals_: eq,
@@ -127,19 +88,12 @@ var visualchars = (function () {
         },
         toString: constant('none()')
       };
-      if (Object.freeze)
-        Object.freeze(me);
       return me;
     }();
     var some = function (a) {
-      var constant_a = function () {
-        return a;
-      };
+      var constant_a = constant(a);
       var self = function () {
         return me;
-      };
-      var map = function (f) {
-        return some(f(a));
       };
       var bind = function (f) {
         return f(a);
@@ -151,8 +105,8 @@ var visualchars = (function () {
         is: function (v) {
           return a === v;
         },
-        isSome: always$1,
-        isNone: never$1,
+        isSome: always,
+        isNone: never,
         getOr: constant_a,
         getOrThunk: constant_a,
         getOrDie: constant_a,
@@ -160,35 +114,31 @@ var visualchars = (function () {
         getOrUndefined: constant_a,
         or: self,
         orThunk: self,
-        map: map,
-        ap: function (optfab) {
-          return optfab.fold(none, function (fab) {
-            return some(fab(a));
-          });
+        map: function (f) {
+          return some(f(a));
         },
         each: function (f) {
           f(a);
         },
         bind: bind,
-        flatten: constant_a,
         exists: bind,
         forall: bind,
         filter: function (f) {
           return f(a) ? me : NONE;
-        },
-        equals: function (o) {
-          return o.is(a);
-        },
-        equals_: function (o, elementEq) {
-          return o.fold(never$1, function (b) {
-            return elementEq(a, b);
-          });
         },
         toArray: function () {
           return [a];
         },
         toString: function () {
           return 'some(' + a + ')';
+        },
+        equals: function (o) {
+          return o.is(a);
+        },
+        equals_: function (o, elementEq) {
+          return o.fold(never, function (b) {
+            return elementEq(a, b);
+          });
         }
       };
       return me;
@@ -196,47 +146,166 @@ var visualchars = (function () {
     var from = function (value) {
       return value === null || value === undefined ? NONE : some(value);
     };
-    var Option = {
+    var Optional = {
       some: some,
       none: none,
       from: from
     };
 
     var typeOf = function (x) {
-      if (x === null)
-        return 'null';
       var t = typeof x;
-      if (t === 'object' && Array.prototype.isPrototypeOf(x))
+      if (x === null) {
+        return 'null';
+      } else if (t === 'object' && (Array.prototype.isPrototypeOf(x) || x.constructor && x.constructor.name === 'Array')) {
         return 'array';
-      if (t === 'object' && String.prototype.isPrototypeOf(x))
+      } else if (t === 'object' && (String.prototype.isPrototypeOf(x) || x.constructor && x.constructor.name === 'String')) {
         return 'string';
-      return t;
+      } else {
+        return t;
+      }
     };
     var isType = function (type) {
       return function (value) {
         return typeOf(value) === type;
       };
     };
-    var isFunction = isType('function');
+    var isSimpleType = function (type) {
+      return function (value) {
+        return typeof value === type;
+      };
+    };
+    var isString = isType('string');
+    var isBoolean = isSimpleType('boolean');
+    var isNumber = isSimpleType('number');
 
     var map = function (xs, f) {
       var len = xs.length;
       var r = new Array(len);
       for (var i = 0; i < len; i++) {
         var x = xs[i];
-        r[i] = f(x, i, xs);
+        r[i] = f(x, i);
       }
       return r;
     };
     var each = function (xs, f) {
       for (var i = 0, len = xs.length; i < len; i++) {
         var x = xs[i];
-        f(x, i, xs);
+        f(x, i);
       }
     };
-    var slice = Array.prototype.slice;
-    var from$1 = isFunction(Array.from) ? Array.from : function (x) {
-      return slice.call(x);
+    var filter = function (xs, pred) {
+      var r = [];
+      for (var i = 0, len = xs.length; i < len; i++) {
+        var x = xs[i];
+        if (pred(x, i)) {
+          r.push(x);
+        }
+      }
+      return r;
+    };
+
+    var keys = Object.keys;
+    var each$1 = function (obj, f) {
+      var props = keys(obj);
+      for (var k = 0, len = props.length; k < len; k++) {
+        var i = props[k];
+        var x = obj[i];
+        f(x, i);
+      }
+    };
+
+    var Global = typeof window !== 'undefined' ? window : Function('return this;')();
+
+    var TEXT = 3;
+
+    var type = function (element) {
+      return element.dom.nodeType;
+    };
+    var value = function (element) {
+      return element.dom.nodeValue;
+    };
+    var isType$1 = function (t) {
+      return function (element) {
+        return type(element) === t;
+      };
+    };
+    var isText = isType$1(TEXT);
+
+    var rawSet = function (dom, key, value) {
+      if (isString(value) || isBoolean(value) || isNumber(value)) {
+        dom.setAttribute(key, value + '');
+      } else {
+        console.error('Invalid call to Attribute.set. Key ', key, ':: Value ', value, ':: Element ', dom);
+        throw new Error('Attribute value was not simple');
+      }
+    };
+    var set = function (element, key, value) {
+      rawSet(element.dom, key, value);
+    };
+    var get$1 = function (element, key) {
+      var v = element.dom.getAttribute(key);
+      return v === null ? undefined : v;
+    };
+    var remove = function (element, key) {
+      element.dom.removeAttribute(key);
+    };
+
+    var read = function (element, attr) {
+      var value = get$1(element, attr);
+      return value === undefined || value === '' ? [] : value.split(' ');
+    };
+    var add = function (element, attr, id) {
+      var old = read(element, attr);
+      var nu = old.concat([id]);
+      set(element, attr, nu.join(' '));
+      return true;
+    };
+    var remove$1 = function (element, attr, id) {
+      var nu = filter(read(element, attr), function (v) {
+        return v !== id;
+      });
+      if (nu.length > 0) {
+        set(element, attr, nu.join(' '));
+      } else {
+        remove(element, attr);
+      }
+      return false;
+    };
+
+    var supports = function (element) {
+      return element.dom.classList !== undefined;
+    };
+    var get$2 = function (element) {
+      return read(element, 'class');
+    };
+    var add$1 = function (element, clazz) {
+      return add(element, 'class', clazz);
+    };
+    var remove$2 = function (element, clazz) {
+      return remove$1(element, 'class', clazz);
+    };
+
+    var add$2 = function (element, clazz) {
+      if (supports(element)) {
+        element.dom.classList.add(clazz);
+      } else {
+        add$1(element, clazz);
+      }
+    };
+    var cleanClass = function (element) {
+      var classList = supports(element) ? element.dom.classList : get$2(element);
+      if (classList.length === 0) {
+        remove(element, 'class');
+      }
+    };
+    var remove$3 = function (element, clazz) {
+      if (supports(element)) {
+        var classList = element.dom.classList;
+        classList.remove(clazz);
+      } else {
+        remove$2(element, clazz);
+      }
+      cleanClass(element);
     };
 
     var fromHtml = function (html, scope) {
@@ -263,13 +332,12 @@ var visualchars = (function () {
       if (node === null || node === undefined) {
         throw new Error('Node cannot be null or undefined');
       }
-      return { dom: constant(node) };
+      return { dom: node };
     };
     var fromPoint = function (docElm, x, y) {
-      var doc = docElm.dom();
-      return Option.from(doc.elementFromPoint(x, y)).map(fromDom);
+      return Optional.from(docElm.dom.elementFromPoint(x, y)).map(fromDom);
     };
-    var Element$$1 = {
+    var SugarElement = {
       fromHtml: fromHtml,
       fromTag: fromTag,
       fromText: fromText,
@@ -277,44 +345,44 @@ var visualchars = (function () {
       fromPoint: fromPoint
     };
 
-    var ATTRIBUTE = Node.ATTRIBUTE_NODE;
-    var CDATA_SECTION = Node.CDATA_SECTION_NODE;
-    var COMMENT = Node.COMMENT_NODE;
-    var DOCUMENT = Node.DOCUMENT_NODE;
-    var DOCUMENT_TYPE = Node.DOCUMENT_TYPE_NODE;
-    var DOCUMENT_FRAGMENT = Node.DOCUMENT_FRAGMENT_NODE;
-    var ELEMENT = Node.ELEMENT_NODE;
-    var TEXT = Node.TEXT_NODE;
-    var PROCESSING_INSTRUCTION = Node.PROCESSING_INSTRUCTION_NODE;
-    var ENTITY_REFERENCE = Node.ENTITY_REFERENCE_NODE;
-    var ENTITY = Node.ENTITY_NODE;
-    var NOTATION = Node.NOTATION_NODE;
-
-    var type = function (element) {
-      return element.dom().nodeType;
+    var charMap = {
+      '\xA0': 'nbsp',
+      '\xAD': 'shy'
     };
-    var value = function (element) {
-      return element.dom().nodeValue;
+    var charMapToRegExp = function (charMap, global) {
+      var regExp = '';
+      each$1(charMap, function (_value, key) {
+        regExp += key;
+      });
+      return new RegExp('[' + regExp + ']', global ? 'g' : '');
     };
-    var isType$1 = function (t) {
-      return function (element) {
-        return type(element) === t;
-      };
+    var charMapToSelector = function (charMap) {
+      var selector = '';
+      each$1(charMap, function (value) {
+        if (selector) {
+          selector += ',';
+        }
+        selector += 'span.mce-' + value;
+      });
+      return selector;
     };
-    var isText = isType$1(TEXT);
+    var regExp = charMapToRegExp(charMap);
+    var regExpGlobal = charMapToRegExp(charMap, true);
+    var selector = charMapToSelector(charMap);
+    var nbspClass = 'mce-nbsp';
 
     var wrapCharWithSpan = function (value) {
-      return '<span data-mce-bogus="1" class="mce-' + Data.charMap[value] + '">' + value + '</span>';
+      return '<span data-mce-bogus="1" class="mce-' + charMap[value] + '">' + value + '</span>';
     };
-    var Html = { wrapCharWithSpan: wrapCharWithSpan };
 
     var isMatch = function (n) {
-      return isText(n) && value(n) !== undefined && Data.regExp.test(value(n));
+      var value$1 = value(n);
+      return isText(n) && value$1 !== undefined && regExp.test(value$1);
     };
     var filterDescendants = function (scope, predicate) {
       var result = [];
-      var dom = scope.dom();
-      var children = map(dom.childNodes, Element$$1.fromDom);
+      var dom = scope.dom;
+      var children = map(dom.childNodes, SugarElement.fromDom);
       each(children, function (x) {
         if (predicate(x)) {
           result = result.concat([x]);
@@ -331,139 +399,143 @@ var visualchars = (function () {
         elm = elm.parentNode;
       }
     };
-    var replaceWithSpans = function (html) {
-      return html.replace(Data.regExpGlobal, Html.wrapCharWithSpan);
-    };
-    var Nodes = {
-      isMatch: isMatch,
-      filterDescendants: filterDescendants,
-      findParentElm: findParentElm,
-      replaceWithSpans: replaceWithSpans
+    var replaceWithSpans = function (text) {
+      return text.replace(regExpGlobal, wrapCharWithSpan);
     };
 
+    var isWrappedNbsp = function (node) {
+      return node.nodeName.toLowerCase() === 'span' && node.classList.contains('mce-nbsp-wrap');
+    };
     var show = function (editor, rootElm) {
-      var node, div;
-      var nodeList = Nodes.filterDescendants(Element$$1.fromDom(rootElm), Nodes.isMatch);
+      var nodeList = filterDescendants(SugarElement.fromDom(rootElm), isMatch);
       each(nodeList, function (n) {
-        var withSpans = Nodes.replaceWithSpans(value(n));
-        div = editor.dom.create('div', null, withSpans);
-        while (node = div.lastChild) {
-          editor.dom.insertAfter(node, n.dom());
+        var parent = n.dom.parentNode;
+        if (isWrappedNbsp(parent)) {
+          add$2(SugarElement.fromDom(parent), nbspClass);
+        } else {
+          var withSpans = replaceWithSpans(editor.dom.encode(value(n)));
+          var div = editor.dom.create('div', null, withSpans);
+          var node = void 0;
+          while (node = div.lastChild) {
+            editor.dom.insertAfter(node, n.dom);
+          }
+          editor.dom.remove(n.dom);
         }
-        editor.dom.remove(n.dom());
       });
     };
-    var hide = function (editor, body) {
-      var nodeList = editor.dom.select(Data.selector, body);
+    var hide = function (editor, rootElm) {
+      var nodeList = editor.dom.select(selector, rootElm);
       each(nodeList, function (node) {
-        editor.dom.remove(node, 1);
+        if (isWrappedNbsp(node)) {
+          remove$3(SugarElement.fromDom(node), nbspClass);
+        } else {
+          editor.dom.remove(node, true);
+        }
       });
     };
     var toggle = function (editor) {
       var body = editor.getBody();
       var bookmark = editor.selection.getBookmark();
-      var parentNode = Nodes.findParentElm(editor.selection.getNode(), body);
+      var parentNode = findParentElm(editor.selection.getNode(), body);
       parentNode = parentNode !== undefined ? parentNode : body;
       hide(editor, parentNode);
       show(editor, parentNode);
       editor.selection.moveToBookmark(bookmark);
     };
-    var VisualChars = {
-      show: show,
-      hide: hide,
-      toggle: toggle
-    };
 
-    var toggleVisualChars = function (editor, toggleState) {
+    var applyVisualChars = function (editor, toggleState) {
+      fireVisualChars(editor, toggleState.get());
       var body = editor.getBody();
-      var selection = editor.selection;
-      var bookmark;
-      toggleState.set(!toggleState.get());
-      Events.fireVisualChars(editor, toggleState.get());
-      bookmark = selection.getBookmark();
       if (toggleState.get() === true) {
-        VisualChars.show(editor, body);
+        show(editor, body);
       } else {
-        VisualChars.hide(editor, body);
+        hide(editor, body);
       }
-      selection.moveToBookmark(bookmark);
     };
-    var Actions = { toggleVisualChars: toggleVisualChars };
+    var toggleVisualChars = function (editor, toggleState) {
+      toggleState.set(!toggleState.get());
+      var bookmark = editor.selection.getBookmark();
+      applyVisualChars(editor, toggleState);
+      editor.selection.moveToBookmark(bookmark);
+    };
 
     var register = function (editor, toggleState) {
       editor.addCommand('mceVisualChars', function () {
-        Actions.toggleVisualChars(editor, toggleState);
+        toggleVisualChars(editor, toggleState);
       });
     };
-    var Commands = { register: register };
-
-    var global$1 = tinymce.util.Tools.resolve('tinymce.util.Delay');
-
-    var setup = function (editor, toggleState) {
-      var debouncedToggle = global$1.debounce(function () {
-        VisualChars.toggle(editor);
-      }, 300);
-      if (editor.settings.forced_root_block !== false) {
-        editor.on('keydown', function (e) {
-          if (toggleState.get() === true) {
-            e.keyCode === 13 ? VisualChars.toggle(editor) : debouncedToggle();
-          }
-        });
-      }
-    };
-    var Keyboard = { setup: setup };
 
     var isEnabledByDefault = function (editor) {
       return editor.getParam('visualchars_default_state', false);
     };
-    var Settings = { isEnabledByDefault: isEnabledByDefault };
+    var hasForcedRootBlock = function (editor) {
+      return editor.getParam('forced_root_block') !== false;
+    };
+
+    var setup = function (editor, toggleState) {
+      editor.on('init', function () {
+        applyVisualChars(editor, toggleState);
+      });
+    };
+
+    var global$1 = tinymce.util.Tools.resolve('tinymce.util.Delay');
 
     var setup$1 = function (editor, toggleState) {
-      editor.on('init', function () {
-        var valueForToggling = !Settings.isEnabledByDefault(editor);
-        toggleState.set(valueForToggling);
-        Actions.toggleVisualChars(editor, toggleState);
-      });
-    };
-    var Bindings = { setup: setup$1 };
-
-    var toggleActiveState = function (editor) {
-      return function (e) {
-        var ctrl = e.control;
-        editor.on('VisualChars', function (e) {
-          ctrl.active(e.state);
+      var debouncedToggle = global$1.debounce(function () {
+        toggle(editor);
+      }, 300);
+      if (hasForcedRootBlock(editor)) {
+        editor.on('keydown', function (e) {
+          if (toggleState.get() === true) {
+            e.keyCode === 13 ? toggle(editor) : debouncedToggle();
+          }
         });
+      }
+      editor.on('remove', debouncedToggle.stop);
+    };
+
+    var toggleActiveState = function (editor, enabledStated) {
+      return function (api) {
+        api.setActive(enabledStated.get());
+        var editorEventCallback = function (e) {
+          return api.setActive(e.state);
+        };
+        editor.on('VisualChars', editorEventCallback);
+        return function () {
+          return editor.off('VisualChars', editorEventCallback);
+        };
       };
     };
-    var register$1 = function (editor) {
-      editor.addButton('visualchars', {
-        active: false,
-        title: 'Show invisible characters',
-        cmd: 'mceVisualChars',
-        onPostRender: toggleActiveState(editor)
+    var register$1 = function (editor, toggleState) {
+      editor.ui.registry.addToggleButton('visualchars', {
+        tooltip: 'Show invisible characters',
+        icon: 'visualchars',
+        onAction: function () {
+          return editor.execCommand('mceVisualChars');
+        },
+        onSetup: toggleActiveState(editor, toggleState)
       });
-      editor.addMenuItem('visualchars', {
+      editor.ui.registry.addToggleMenuItem('visualchars', {
         text: 'Show invisible characters',
-        cmd: 'mceVisualChars',
-        onPostRender: toggleActiveState(editor),
-        selectable: true,
-        context: 'view',
-        prependToContext: true
+        icon: 'visualchars',
+        onAction: function () {
+          return editor.execCommand('mceVisualChars');
+        },
+        onSetup: toggleActiveState(editor, toggleState)
       });
     };
 
-    global.add('visualchars', function (editor) {
-      var toggleState = Cell(false);
-      Commands.register(editor, toggleState);
-      register$1(editor);
-      Keyboard.setup(editor, toggleState);
-      Bindings.setup(editor, toggleState);
-      return Api.get(toggleState);
-    });
     function Plugin () {
+      global.add('visualchars', function (editor) {
+        var toggleState = Cell(isEnabledByDefault(editor));
+        register(editor, toggleState);
+        register$1(editor, toggleState);
+        setup$1(editor, toggleState);
+        setup(editor, toggleState);
+        return get(toggleState);
+      });
     }
 
-    return Plugin;
+    Plugin();
 
 }());
-})();
