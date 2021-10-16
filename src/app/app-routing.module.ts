@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { RiderComponent } from './rider/rider.component';
 
 const routes: Routes = [
+  { path: '', redirectTo: '/rider', pathMatch: 'full' },
   { path: 'rider', component: RiderComponent },
 ];
 

@@ -1,1 +1,80 @@
-<p>rider works!</p>
+<div class="row">
+  <div class="col-md-12 grid-margin">
+    <div class="row">
+      <div class="col-12 col-xl-12 mb-4 mb-xl-0">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            Welcome {{riderRecord.name}}
+            <div class="float-right">
+              <div class="btn-group btn-toggle">
+                <button class="btn btn-sm btn-secondary" type="button" (click)="online()">ON</button>
+                <button class="btn btn-sm btn-primary active" type="button" (click)="offline()">OFF</button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div *ngIf="currentlyOffline">
+              <h6 class="font-weight-bold mb-0"><span class="text-primary">You are currently
+                  offline!</span><br /><br />Go
+                online to accept bookings.</h6>
+            </div>
+            <div *ngIf="currentlyOnline">
+              <div class="form-group">
+                <label class="font-weight-bold">Select Address Type</label>
+                <select class="form-control form-control-sm col-12 col-xl-4" (change)="selectedAddressType($event)">
+                  <option value="Residential">Residential</option>
+                  <option value="Current">Current</option>
+                </select>
+              </div>
+            </div>
+            <div *ngIf="residential">
+              <h6 class="font-weight-bold mb-0">Province: {{riderRecord.province}}</h6>
+            </div>
+            <div *ngIf="current">
+              <p>Please input your current location.</p>
+              <div class="row">
+                <div class="col-xl-3 col-xs-12">
+                  <div class="form-group">
+                    <select name="region" class="form-control form-control-sm">
+                      <option value="">Region</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xl-3 col-xs-12">
+                  <div class="form-group">
+                    <select name="region" class="form-control form-control-sm">
+                      <option value="">Province</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xl-3 col-xs-12">
+                  <div class="form-group">
+                    <select name="region" class="form-control form-control-sm">
+                      <option value="">City</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xl-3 col-xs-12">
+                  <div class="form-group">
+                    <select name="region" class="form-control form-control-sm">
+                      <option value="">Barangay</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xl-12 col-xs-12">
+                  <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Street Address">
+                  </div>
+                </div>
+                <div class="col-xl-12 col-xs-12">
+                  <button type="button" class="btn btn-primary btn-block col-xl-2 col-xs-12">Block level
+                    button</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

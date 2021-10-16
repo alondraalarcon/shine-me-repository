@@ -1,38 +1,35 @@
 {
-  "_args": [
-    [
-      "tinymce@4.9.3",
-      "/Applications/XAMPP/xamppfiles/htdocs/ripple"
-    ]
-  ],
-  "_from": "tinymce@4.9.3",
-  "_id": "tinymce@4.9.3",
+  "_from": "tinymce@^5.0.8",
+  "_id": "tinymce@5.7.0",
   "_inBundle": false,
-  "_integrity": "sha512-3IjnswgmzJJSgaJR9+tOPK7UYlHoxv8YzUi8ChqetIt1uljRycyqSu8aq1DOyPc+WJCZi9fWo9fEHCEAIYGaLg==",
+  "_integrity": "sha512-WikgMpJbqYPaucV3lfstCj+Y4NquZlK61gyuJ2eqDUBlSU+4fFh6rpwnelVTxuvtEyJsAVOl8HZmbzBfDJiLsQ==",
   "_location": "/tinymce",
   "_phantomChildren": {},
   "_requested": {
-    "type": "version",
+    "type": "range",
     "registry": true,
-    "raw": "tinymce@4.9.3",
+    "raw": "tinymce@^5.0.8",
     "name": "tinymce",
     "escapedName": "tinymce",
-    "rawSpec": "4.9.3",
+    "rawSpec": "^5.0.8",
     "saveSpec": null,
-    "fetchSpec": "4.9.3"
+    "fetchSpec": "^5.0.8"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/tinymce/-/tinymce-4.9.3.tgz",
-  "_spec": "4.9.3",
-  "_where": "/Applications/XAMPP/xamppfiles/htdocs/ripple",
+  "_resolved": "https://registry.npmjs.org/tinymce/-/tinymce-5.7.0.tgz",
+  "_shasum": "bc565877e4041db83848a330dfa7916993110cba",
+  "_spec": "tinymce@^5.0.8",
+  "_where": "/Users/jyothish/Documents/skydash-free-bootstrap-admin-template/template",
   "author": {
-    "name": "Ephox Corporation"
+    "name": "Tiny Technologies, Inc"
   },
   "bugs": {
     "url": "https://github.com/tinymce/tinymce/issues"
   },
+  "bundleDependencies": false,
+  "deprecated": false,
   "description": "Web based JavaScript HTML WYSIWYG editor control.",
   "homepage": "https://github.com/tinymce/tinymce-dist#readme",
   "keywords": [
@@ -50,5 +47,6 @@
     "type": "git",
     "url": "git+https://github.com/tinymce/tinymce-dist.git"
   },
-  "version": "4.9.3"
+  "types": "tinymce.d.ts",
+  "version": "5.7.0"
 }
